@@ -16,7 +16,7 @@ export default function Footer() {
                 <Link href="https://github.com/liuyuhe666">Made with ❤️ by Liu Yuhe</Link>
             </div>
             <div className="flex gap-2 justify-start items-center">
-                <Link href="/">Version: {packageJSON.version}</Link>
+                <Link href="https://github.com/liuyuhe666/my-github-following">Version: {packageJSON.version}</Link>
             </div>
         </footer>
     );
