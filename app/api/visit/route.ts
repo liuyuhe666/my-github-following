@@ -6,7 +6,6 @@ export async function GET(req: Request) {
     const username = searchParams.get('username');
     const name = searchParams.get('name');
     const htmlUrl = searchParams.get('htmlUrl') ?? "https://github.com";
-    console.log(getUserFollowingKey(username??"test", name??"test"));
     if (username && name && await storage.hasItem(getUserFollowingKey(username, name))) {
         const num = await storage.getItem<number>(getUserFollowingKey(username, name));
         if (num) {
