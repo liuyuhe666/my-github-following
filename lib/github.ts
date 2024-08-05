@@ -6,9 +6,23 @@ import {
  } from "./key";
 import { Octokit } from "octokit";
 
-const octokit = new Octokit();
+let octokit = new Octokit();
 
-export async function initData(username: string) {
+function setOctokitToken(token: string) {
+    if (token) {
+        octokit = new Octokit({
+            token
+        });
+    }
+}
+
+export async function initData(userId: string | undefined) {
+    const accountKey = await storage.getItem(`user:account:by-user-id:${userId}`) as string;
+    const account = await storage.getItem(accountKey) as any;
+    const token = account.access_token;
+    setOctokitToken(token);
+    const user = await storage.getItem(`user:${userId}`) as any;
+    const username = user.username;
     const result = await queryFollowing(1, username);
     const followingList: string[] = [];
     for (let item of result) {
@@ -25,7 +39,7 @@ async function queryFollowing(page = 1, username: string) {
     let { data: following } = await octokit.rest.users.listFollowingForUser({
         username,
         per_page: 100,
-        page
+        page,
     });
     if (following.length >= 100) {
         following = following.concat(await queryFollowing(page + 1, username));
@@ -34,19 +48,19 @@ async function queryFollowing(page = 1, username: string) {
 }
 
 export async function getFollowingList(username: string) {
-    const arr: any[] = [];
+    const result: any[] = [];
     if (await storage.hasItem(getUserFollowingListKey(username))) {
         const followingList = await storage.getItem(getUserFollowingListKey(username)) as string[];
         for (const item of followingList) {
             const num = await storage.getItem<number>(getUserFollowingKey(username, item));
-            arr.push({
+            result.push({
                 name: item,
-                count: num
+                count: num,
             });
         }
-        arr.sort((a, b) => { return b.count - a.count });
+        result.sort((a, b) => { return b.count - a.count });
     }
-    return arr;
+    return result;
 }
 
 export async function getUserInfo(username: string) {

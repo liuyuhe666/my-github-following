@@ -37,10 +37,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return session;
         },
         async signIn({ user }) {
-            // 登录成功后，初始化数据
-            await initData(user.username);
+            await initData(user.id);
             return true;
         },
     },
-    // debug: process.env.NODE_ENV !== "production" ? true : false
+    debug: process.env.NODE_ENV !== "production" ? true : false
 });
