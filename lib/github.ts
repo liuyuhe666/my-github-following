@@ -3,50 +3,33 @@ import {
     getUserFollowingListKey,
     getUserFollowingKey,
     getUserInfoKey,
- } from "./key";
-import { Octokit } from "octokit";
+} from "./key";
 
-let octokit = new Octokit();
-
-function setOctokitToken(token: string) {
-    if (token) {
-        octokit = new Octokit({
-            token
-        });
-    }
-}
-
-export async function initData(userId: string | undefined) {
-    const accountKey = await storage.getItem(`user:account:by-user-id:${userId}`) as string;
-    const account = await storage.getItem(accountKey) as any;
-    const token = account.access_token;
-    setOctokitToken(token);
-    const user = await storage.getItem(`user:${userId}`) as any;
-    const username = user.username;
-    const result = await queryFollowing(1, username);
-    const followingList: string[] = [];
-    for (let item of result) {
-        await storage.setItem(getUserInfoKey(item.login), item);
-        followingList.push(item.login);
-    }
-    await storage.setItem(getUserFollowingListKey(username), followingList);
-    for (let item of followingList) {
-        if (!await storage.hasItem(getUserFollowingKey(username, item))) {
-            await storage.setItem<number>(getUserFollowingKey(username, item), 1);
+export async function syncData(username: string) {
+    if (!username) return;
+    const data = await queryUserFollowingList(1, username);
+    const followingNameList: string[] = [];
+    for (const item of data) {
+        const name: string = item.login;
+        followingNameList.push(name);
+        // 用户信息
+        await storage.setItem(getUserInfoKey(name), item);
+        // 访问次数
+        if (!await storage.hasItem(getUserFollowingKey(username, name))) {
+            await storage.setItem(getUserFollowingKey(username, name), 1);
         }
     }
+    await storage.setItem(getUserFollowingListKey(username), followingNameList);
 }
 
-async function queryFollowing(page = 1, username: string) {
-    let { data: following } = await octokit.rest.users.listFollowingForUser({
-        username,
-        per_page: 100,
-        page,
-    });
-    if (following.length >= 100) {
-        following = following.concat(await queryFollowing(page + 1, username));
+async function queryUserFollowingList(page: number = 1, username: string) {
+    const url = `https://api.github.com/users/${username}/following?page=${page}&per_page=100`;
+    const data = await fetch(url);
+    let followingList = await data.json() as any[];
+    if (followingList.length >= 100) {
+        followingList = followingList.concat(await queryUserFollowingList(page + 1, username));
     }
-    return following;
+    return followingList;
 }
 
 export async function getFollowingList(username: string) {

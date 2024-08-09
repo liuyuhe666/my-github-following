@@ -1,21 +1,18 @@
-import Image from "next/image";
 import { getUserInfo } from "@/lib/github";
-import Link from "next/link";
 import { auth } from "@/auth";
 
-export default async function UserDetail({ name }: {name: string}) {
-    const user = await getUserInfo(name);
+export default async function UserDetail({ username }: {username: string}) {
+    const user = await getUserInfo(username);
     const session = await auth();
     return (
         <li className="py-3 sm:py-4">
             <div className="flex items-center">
                 <div className="flex-shrink-0">
-                    <Image 
-                        className="rounded-full"
+                    {/* eslint-disable-next-line */}
+                    <img 
+                        className="rounded-full size-8"
                         src={user.avatar_url}
-                        width={32}
-                        height={32}
-                        alt="Avatar" />
+                        alt="User Avatar" />
                 </div>
                 <div className="flex-1 min-w-0 ms-4">
                     <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
@@ -26,15 +23,15 @@ export default async function UserDetail({ name }: {name: string}) {
                     </p>
                 </div>
                 <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    <Link 
-                        href={`/api/visit?username=${session?.user.username}&name=${user.login}&htmlUrl=${user.html_url}`}
+                    <a 
+                        href={`/api/visit?username=${session?.user?.username}&name=${user.login}&htmlUrl=${user.html_url}`}
                         target="_blank"
                         rel="noopener noreferrer"
                     >
                         <button type="button" className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">
                             Visit
                         </button>
-                    </Link>
+                    </a>
                 </div>
             </div>
         </li>
