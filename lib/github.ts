@@ -31,7 +31,9 @@ export async function initData(userId: string | undefined) {
     }
     await storage.setItem(getUserFollowingListKey(username), followingList);
     for (let item of followingList) {
-        await storage.setItem<number>(getUserFollowingKey(username, item), 1);
+        if (!await storage.hasItem(getUserFollowingKey(username, item))) {
+            await storage.setItem<number>(getUserFollowingKey(username, item), 1);
+        }
     }
 }
 
