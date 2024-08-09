@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth/unstorage-adapter": "^2.4.2",
+    "@next/eslint-plugin-next": "^14.2.5",
     "@vercel/kv": "^1.0.1",
     "@vercel/speed-insights": "^1.0.12",
     "mongodb": "^6.8.0",

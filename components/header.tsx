@@ -13,7 +13,6 @@ export default function Header() {
                             alt="Logo"
                             width={32}
                             height={32}
-                            className="min-w-8"
                         />
                     </Link>
                     <span className="text-2xl font-bold">GitHub Following</span>
