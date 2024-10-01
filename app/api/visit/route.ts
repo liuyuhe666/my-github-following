@@ -1,16 +1,23 @@
-import { storage } from "@/lib/storage";
-import { getUserFollowingKey } from "@/lib/key";
+import kv from '@/lib/kv'
+import { getHashMapKey, getSortedSetKey } from '@/lib/key'
 
 export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const username = searchParams.get('username');
-    const name = searchParams.get('name');
-    const htmlUrl = searchParams.get('htmlUrl') ?? "https://github.com";
-    if (username && name && await storage.hasItem(getUserFollowingKey(username, name))) {
-        const num = await storage.getItem(getUserFollowingKey(username, name)) as number;
-        if (num) {
-            await storage.setItem(getUserFollowingKey(username, name), num + 1);
-        }
+  const { searchParams } = new URL(req.url)
+  const from = searchParams.get('from') ?? ''
+  const to = searchParams.get('to') ?? ''
+  const avatar = searchParams.get('avatar') ?? ''
+  if (from && to && avatar) {
+    if (!await kv.zscore(getSortedSetKey(from), to)) {
+      await kv.zadd(getSortedSetKey(from), { score: 1, member: to })
+      await kv.hset(getHashMapKey(from), { to: avatar })
     }
-    return Response.redirect(htmlUrl);
+    else {
+      const num = await kv.zscore(getSortedSetKey(from), to)
+      if (num) {
+        await kv.zadd(getSortedSetKey(from), { score: num + 1, member: to })
+      }
+    }
+  }
+  const htmlUrl = searchParams.get('url') ?? 'https://github.com'
+  return Response.redirect(htmlUrl)
 }

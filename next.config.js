@@ -1,5 +1,5 @@
 module.exports = {
-    images: {
-      remotePatterns: [],
-    },
+  images: {
+    remotePatterns: [],
+  },
 }
