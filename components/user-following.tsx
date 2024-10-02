@@ -2,63 +2,27 @@
 
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import type { GitHubUserInfo } from '@/lib/github'
-import { getUserFollowing, getUserFollowingByVisitCount } from '@/lib/github'
+import { getUserFollowing } from '@/lib/github'
 
 export default function UserFollowing() {
   const session = useSession()
-  const username = session.data?.user.username
-  if (!username) {
-    return
-  }
-  const [tabIndex, setTabIndex] = useState(1)
+  const username = session.data?.user.username ?? ''
   const [data, setData] = useState<GitHubUserInfo[]>([])
   useEffect(() => {
     const fetchData = async () => {
       const result = await getUserFollowing(1, username)
       setData(result)
     }
-
     fetchData()
-  }, [])
-  const tabClick = async (index: number) => {
-    setTabIndex(index)
-    if (index === 1) {
-      const result = await getUserFollowing(1, username)
-      setData(result)
-    }
-    else if (index === 2) {
-      const result = await getUserFollowingByVisitCount(username)
-      setData(result)
-    }
-  }
+  }, [username])
   return (
     <div className="w-full bg-white border border-gray-200 rounded-lg shadow">
-      <a href="#">
-        <h5 className="my-2 text-2xl text-center font-bold tracking-tight text-gray-900">{`${username}'s following`}</h5>
-      </a>
-      <div className="text-sm font-medium text-center text-gray-500 border-b border-gray-200">
-        <ul className="flex flex-wrap -mb-px">
-          <li className="me-2">
-            <a
-              href="#"
-              className={tabIndex === 1 ? 'inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg' : 'inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300'}
-              onClick={() => tabClick(1)}
-            >
-              默认
-            </a>
-          </li>
-          <li className="me-2">
-            <a
-              href="#"
-              className={tabIndex === 2 ? 'inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg' : 'inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300'}
-              onClick={() => tabClick(2)}
-            >
-              访问次数
-            </a>
-          </li>
-        </ul>
-      </div>
+      <Link href="#">
+        <h5 className="mt-4 text-2xl text-center font-bold tracking-tight text-gray-900">My GitHub Following</h5>
+      </Link>
       <div className="p-4">
         <ul className="divide-y divide-gray-200">
           {
@@ -66,7 +30,7 @@ export default function UserFollowing() {
               <li className="py-3 sm:py-4" key={item.id}>
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <img className="w-8 h-8 rounded-full" src={item.avatar_url} alt="avatar" />
+                    <Image width={32} height={32} src={item.avatar_url} alt="avatar" className="rounded-full" />
                   </div>
                   <div className="flex-1 min-w-0 ms-4">
                     <p className="text-sm font-medium text-gray-900 truncate">
@@ -77,9 +41,12 @@ export default function UserFollowing() {
                     </p>
                   </div>
                   <div className="inline-flex items-center text-base font-semibold text-gray-900 hover:text-gray-600">
-                    <a href={`/api/visit?url=${item.html_url}&from=${username}&to=${item.login}&avatar=${item.avatar_url}`} target="_blank">
-                      访问 GitHub 主页
-                    </a>
+                    <Link href={item.html_url} target="_blank" title={item.login}>
+                      <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m9 5 7 7-7 7" />
+                      </svg>
+
+                    </Link>
                   </div>
                 </div>
               </li>

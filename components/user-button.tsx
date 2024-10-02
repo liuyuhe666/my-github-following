@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { SignIn, SignOut } from './auth-component'
 import { auth } from '@/auth'
 
@@ -10,13 +11,15 @@ export default async function UserButton() {
       <span className="hidden text-sm sm:inline-flex">
         {session.user.name}
       </span>
-      <img
+      <Image
         src={
           session.user.image
-          ?? 'https://source.boringavatars.com/marble/120'
+          ?? ''
         }
-        alt={session.user.name ?? ''}
-        className="rounded-full size-8"
+        alt={session.user.name ?? 'avatar'}
+        height={32}
+        width={32}
+        className="rounded-full"
       />
       <SignOut />
     </div>
